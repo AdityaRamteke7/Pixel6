@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchUserData, setSorting, setFilter } from '../redux/action/userAction';
 import {
@@ -25,20 +25,14 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
     fontWeight: 'bold',
 }));
 
-const UserPostList = () => {
+const UserList = () => {
     const dispatch = useDispatch();
-    const { users, loading, error, sortColumn, sortOrder, filters, limit, skip, hasMore } = useSelector(state => state.users);
+    const { users, loading, error, sortColumn, sortOrder, filters, limit, skip } = useSelector(state => state.users);
     const observerRef = useRef();
 
     useEffect(() => {
-        dispatch(fetchUserData(limit, 0, filters.country, filters.gender, sortColumn, sortOrder));
-    }, [dispatch, filters.country, filters.gender, sortColumn, sortOrder]);
-
-    const loadMoreUsers = useCallback(() => {
-        if (!loading && hasMore) {
-            dispatch(fetchUserData(limit, users.length, filters.country, filters.gender, sortColumn, sortOrder));
-        }
-    }, [dispatch, loading, users.length, filters.country, filters.gender, sortColumn, sortOrder, hasMore]);
+        dispatch(fetchUserData(limit, skip, filters.country, filters.gender, sortColumn, sortOrder));
+    }, [dispatch, limit, skip, filters, sortColumn, sortOrder]);
 
     useEffect(() => {
         const option = {
@@ -47,8 +41,8 @@ const UserPostList = () => {
             threshold: 1.0,
         };
         const observer = new IntersectionObserver(([entry]) => {
-            if (entry.isIntersecting) {
-                loadMoreUsers();
+            if (entry.isIntersecting && !loading) {
+                dispatch(fetchUserData(limit, users.length, filters.country, filters.gender, sortColumn, sortOrder));
             }
         }, option);
 
@@ -61,14 +55,14 @@ const UserPostList = () => {
                 observer.unobserve(observerRef.current);
             }
         };
-    }, [loadMoreUsers]);
+    }, [dispatch, loading, limit, users.length, filters.country, filters.gender, sortColumn, sortOrder]);
 
     const handleSort = (column) => {
         dispatch(setSorting(column));
     };
 
     const handleFilterChange = (filterType) => (event) => {
-        dispatch(setFilter({ [filterType]: event.target.value }));
+        dispatch(setFilter(filterType, event.target.value));
     };
 
     return (
@@ -84,6 +78,7 @@ const UserPostList = () => {
                         <MenuItem value="United States">United States</MenuItem>
                         <MenuItem value="Canada">Canada</MenuItem>
                         <MenuItem value="United Kingdom">United Kingdom</MenuItem>
+
                     </Select>
                 </FormControl>
                 <FormControl sx={{ minWidth: 120 }}>
@@ -121,18 +116,17 @@ const UserPostList = () => {
                     </TableHead>
                     <TableBody>
                         {users && users.map((user, index) => (
-                            <TableRow key={user.id} ref={index === users.length - 1 ? observerRef : null}>
-                                <TableCell>{user.id < 10 ? `0${user.id}` : user.id}</TableCell>
+                            <TableRow key={`${user.id}-${index}`} ref={index === users.length - 1 ? observerRef : null}>
+                                <TableCell>{user.id < 10 ? <span>0{user.id}</span> : <span>{user.id}</span>}</TableCell>
                                 <TableCell>
                                     <Avatar alt={`${user.firstName} ${user.lastName}`} src={user.image} sx={{ marginRight: 1 }} />
                                 </TableCell>
                                 <TableCell>{user.firstName} {user.lastName}</TableCell>
                                 <TableCell>{`${user.gender.charAt(0).toUpperCase()}/${user.age}`}</TableCell>
                                 <TableCell>{user.company.title}</TableCell>
-                                <TableCell>{user.address.city}, {user.address.state}, {user.address.country}</TableCell>
+                                <TableCell>{user.address.city}, {user.address.state}</TableCell>
                             </TableRow>
                         ))}
-                        <div ref={observerRef} />
                     </TableBody>
                 </Table>
             </TableContainer>
@@ -140,4 +134,4 @@ const UserPostList = () => {
     );
 };
 
-export default UserPostList;
+export default UserList;
