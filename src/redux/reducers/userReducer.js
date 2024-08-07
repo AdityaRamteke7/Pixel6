@@ -1,16 +1,15 @@
-import {
-    FETCH_USERS_REQUEST,
-    FETCH_USERS_SUCCESS,
-    FETCH_USERS_FAILURE,
-    SET_SORTING,
-    SET_FILTER,
-} from '../action/userAction';
+import { FETCH_USERS_SUCCESS, FETCH_USERS_REQUEST, FETCH_USERS_FAILURE, SET_FILTER, SET_SORTING } from "../action/userAction";
+
+
 
 const initialState = {
-    loading: false,
     users: [],
-    error: '',
-    sorting: null,
+    loading: false,
+    error: null,
+    sortColumn: 'id',
+    sortOrder: 'asc',
+    limit: 10,
+    skip: 0,
     filters: {
         country: '',
         gender: '',
@@ -22,13 +21,31 @@ const userReducer = (state = initialState, action) => {
         case FETCH_USERS_REQUEST:
             return { ...state, loading: true };
         case FETCH_USERS_SUCCESS:
-            return { ...state, loading: false, users: [...state.users, ...action.payload] };
+            return {
+                ...state,
+                loading: false,
+                users: [...state.users, ...action.payload],
+            };
         case FETCH_USERS_FAILURE:
-            return { ...state, loading: false, error: action.error.message };
+            return { ...state, loading: false, error: action.payload };
         case SET_SORTING:
-            return { ...state, sorting: action.payload };
+            return {
+                ...state,
+                sortColumn: action.payload.sortColumn,
+                sortOrder: action.payload.sortOrder,
+                users: [],
+                skip: 0,
+            };
         case SET_FILTER:
-            return { ...state, filters: { ...state.filters, ...action.payload } };
+            return {
+                ...state,
+                filters: {
+                    ...state.filters,
+                    [action.payload.filterType]: action.payload.value,
+                },
+                users: [],
+                skip: 0,
+            };
         default:
             return state;
     }
