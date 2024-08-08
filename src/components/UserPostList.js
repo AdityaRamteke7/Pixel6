@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchUserData, setSorting, setFilter } from '../redux/action/userAction';
+import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import {
     Table,
     TableBody,
@@ -70,10 +71,12 @@ const UserList = () => {
             <Typography variant="h4" component="div" gutterBottom>
                 Employees
             </Typography>
+
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 2 }}>
+                <FilterAltIcon sx={{ color: "#800020", gap: "2px" }} />
                 <FormControl sx={{ minWidth: 120, marginRight: 2 }}>
                     <InputLabel>Country</InputLabel>
-                    <Select value={filters.country} onChange={handleFilterChange('country')}>
+                    <Select size='small' value={filters.country} onChange={handleFilterChange('country')}>
                         <MenuItem value=""><em>None</em></MenuItem>
                         <MenuItem value="United States">United States</MenuItem>
                         <MenuItem value="Canada">Canada</MenuItem>
@@ -83,7 +86,7 @@ const UserList = () => {
                 </FormControl>
                 <FormControl sx={{ minWidth: 120 }}>
                     <InputLabel>Gender</InputLabel>
-                    <Select value={filters.gender} onChange={handleFilterChange('gender')}>
+                    <Select size='small' value={filters.gender} onChange={handleFilterChange('gender')}>
                         <MenuItem value=""><em>None</em></MenuItem>
                         <MenuItem value="male">Male</MenuItem>
                         <MenuItem value="female">Female</MenuItem>
